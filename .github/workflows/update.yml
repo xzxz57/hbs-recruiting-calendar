@@ -1,0 +1,33 @@
+name: Update ICS File Daily
+
+on:
+  schedule:
+    - cron: '0 1 * * *'  # 每天凌晨1点 UTC
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: pip install requests beautifulsoup4
+
+      - name: Run script to generate ICS
+        run: |
+          python generate_hbs_calendar.py
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add hbs_recruiting.ics
+          git commit -m "Auto update ICS file" || echo "No changes"
+          git push
